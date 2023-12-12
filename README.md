@@ -16,6 +16,7 @@
 6. 大功告成!
 
 ## 文档
+飞书文档: https://bingyan.feishu.cn/wiki/T7KswLNznitoQ4k4gqTc9T33nLe
 笑死，还没开始写
 
 这玩意挺复杂的，自己研究可能不太能研究出来怎么用，如果急着用的话可以去群里 @Hamster
