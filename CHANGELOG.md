@@ -20,3 +20,14 @@
 
 ### 修复
 * 节点图内通过拖拽连线到空位置，以选择资源并创建节点时，节点的资源属性框没有正确赋值的问题
+
+## [0.0.1-beta3] - 2023-12-15
+### 新增
+* `StoryGraphExecutor` 的“初始时执行”属性
+* 【搜索并添加节点】窗口对 `.hamstory` 后缀的支持
+
+### 修改
+* 现在 `StoryGraph` 将统称为 "故事节点图"
+* `StoryChainExecutor` 改名为 `StoryGraphExecutor`
+* 现在 `DataProvider` 为 `StoryExecutorBase` 的非必须参数
+* 创建 `.hamstory` 文件时，现在默认使用 `TextAsset` 的图标了
