@@ -9,7 +9,7 @@ namespace Hamstory
 
         [SerializeField, Title("界面源")] private VisualProvider visual;
         [SerializeField, Title("数据源")] private DataProvider data;
-        [SerializeField, Title("故事线")] private StoryGraph graph;
+        [SerializeField, Title("故事节点图")] private StoryGraph graph;
 
         private StoryChain chain;
 
