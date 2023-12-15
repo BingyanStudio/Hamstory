@@ -19,7 +19,7 @@ namespace Hamstory
             list.Add(new SearchTreeGroupEntry(new("故事"), 1));
 
             AssetDatabase.GetAllAssetPaths()
-                .Where(i => i.StartsWith("Assets") && (i.EndsWith(".txt") || i.EndsWith(".story")))
+                .Where(i => i.StartsWith("Assets") && (i.EndsWith(".txt") || i.EndsWith(".hamstory")))
                 .ToList().ForEach(i =>
                 {
                     int j = 2, k = i.Length;
@@ -31,7 +31,7 @@ namespace Hamstory
                     list.Add(new SearchTreeEntry(new(i.Substring(k, i.Length - k).Trim('/'))) { level = 2, userData = i });
                 });
 
-            list.Add(new SearchTreeGroupEntry(new("故事链"), 1));
+            list.Add(new SearchTreeGroupEntry(new("故事节点图"), 1));
 
             AssetDatabase.GetAllAssetPaths()
                 .Where(i => i.StartsWith("Assets") && i.EndsWith(".asset") && AssetDatabase.LoadAssetAtPath<StoryGraph>(i))

@@ -1,6 +1,6 @@
 {
     "name": "org.bingyan.hamstory",
-    "version": "0.0.1-beta2",
+    "version": "0.0.1-beta3",
     "displayName": "Hamstory",
     "description": "Hamstory - 脚本故事框架",
     "unity": "2019.1",
