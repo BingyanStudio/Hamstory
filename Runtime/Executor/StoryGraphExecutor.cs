@@ -3,8 +3,10 @@ using UnityEngine;
 
 namespace Hamstory
 {
-    public class StoryChainExecutor : StoryExecutorBase
+    public class StoryGraphExecutor : StoryExecutorBase
     {
+        [SerializeField, Title("开始时执行")] private bool executeOnAwake = false;
+
         [SerializeField, Title("界面源")] private VisualProvider visual;
         [SerializeField, Title("数据源")] private DataProvider data;
         [SerializeField, Title("故事线")] private StoryGraph graph;
@@ -17,7 +19,9 @@ namespace Hamstory
         private void Awake()
         {
             chain = new(graph);
-            Execute();
+
+            if (executeOnAwake)
+                Execute();
         }
 
         public void Execute()
