@@ -22,6 +22,7 @@ namespace Hamstory.Editor
         private bool deletionForUndo = false;
 
         internal GraphEdgeConnector Connector { get; private set; }
+        private Port pendingPort;
 
         private SearchWindowProvider searchProvider;
 
@@ -250,7 +251,6 @@ namespace Hamstory.Editor
             }
         }
 
-        private Port pendingPort;
         internal void ShowSearchWindow(Vector2 pos, Edge targetEdge)
         {
             pendingPort = targetEdge.input ?? targetEdge.output;
