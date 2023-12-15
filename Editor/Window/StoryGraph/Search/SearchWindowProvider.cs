@@ -19,7 +19,7 @@ namespace Hamstory
             list.Add(new SearchTreeGroupEntry(new("故事"), 1));
 
             AssetDatabase.GetAllAssetPaths()
-                .Where(i => i.StartsWith("Assets") && (i.EndsWith(".txt") || i.EndsWith(".story")))
+                .Where(i => i.StartsWith("Assets") && (i.EndsWith(".txt") || i.EndsWith(".hamstory")))
                 .ToList().ForEach(i =>
                 {
                     int j = 2, k = i.Length;

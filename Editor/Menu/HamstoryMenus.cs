@@ -13,7 +13,9 @@ namespace Hamstory
         {
             // EditorPrefs.
             var ts = new TextAsset();
-            ProjectWindowUtil.CreateAssetWithContent("Story.hamstory", "[Char] A, B\r\nA: 你好!\r\nB: 欢迎使用 Hamstory !", (Texture2D)EditorGUIUtility.IconContent("TextAsset Icon").image);
+            ProjectWindowUtil.CreateAssetWithContent("Story.hamstory", 
+                "[Char] A, B\r\nA: 你好!\r\nB: 欢迎使用 Hamstory !", 
+                (Texture2D)EditorGUIUtility.IconContent("TextAsset Icon").image);
         }
     }
 }
