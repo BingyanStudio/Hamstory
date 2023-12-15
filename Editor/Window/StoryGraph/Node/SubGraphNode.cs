@@ -69,6 +69,7 @@ namespace Hamstory.Editor
         public void SetSubgraph(StoryGraph subgraph)
         {
             UpdateGraph(Data.Subgraph, subgraph);
+            graphField.value = subgraph;
         }
     }
 }

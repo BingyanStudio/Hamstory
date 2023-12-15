@@ -177,6 +177,7 @@ namespace Hamstory.Editor
 
         public void SetStory(TextAsset story)
         {
+            storyField.value = story;
             Data.StoryText = story;
             ParseStory(story);
         }
