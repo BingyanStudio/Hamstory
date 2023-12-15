@@ -181,7 +181,7 @@ namespace Hamstory.Editor
 
             evt.menu.AppendAction("添加故事脚本", a => CreateStoryNode(GetMousePosition(a.eventInfo.localMousePosition)));
 
-            evt.menu.AppendAction("添加故事链", a => CreateSubGraphNode(GetMousePosition(a.eventInfo.localMousePosition)));
+            evt.menu.AppendAction("添加故事节点图", a => CreateSubGraphNode(GetMousePosition(a.eventInfo.localMousePosition)));
         }
 
         protected override void ExecuteDefaultAction(EventBase evt)

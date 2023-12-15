@@ -31,7 +31,7 @@ namespace Hamstory
                     list.Add(new SearchTreeEntry(new(i.Substring(k, i.Length - k).Trim('/'))) { level = 2, userData = i });
                 });
 
-            list.Add(new SearchTreeGroupEntry(new("故事链"), 1));
+            list.Add(new SearchTreeGroupEntry(new("故事节点图"), 1));
 
             AssetDatabase.GetAllAssetPaths()
                 .Where(i => i.StartsWith("Assets") && i.EndsWith(".asset") && AssetDatabase.LoadAssetAtPath<StoryGraph>(i))
