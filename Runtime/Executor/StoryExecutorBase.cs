@@ -51,7 +51,7 @@ namespace Hamstory
         public virtual GameObject GetDialogPanel() => Visual.GetDialogPanel();
         public abstract void SetCharacter(string key, string extra = "");
         public virtual void ClearCharacter() => Visual.ClearCharacter();
-        public virtual void SetText(string content) => Visual.SetText(this, Data.Serialize(this, content));
+        public virtual void SetText(string content) => Visual.SetText(this, Data ? Data.Serialize(this, content) : content);
         public virtual void CreateMenu(List<MenuOption> options) => Visual.CreateMenu(this, options);
         public virtual void ClearMenu() => Visual.ClearMenu();
 
