@@ -5,11 +5,11 @@ using UnityEngine.UIElements;
 
 namespace Hamstory.Editor
 {
-    public abstract class GraphNode : Node
+    internal abstract class GraphNode : Node
     {
-        public abstract string GUID { get; }
-        public abstract Port FlowIn { get; }
-        public abstract Port FlowOut { get; }
+        internal abstract string GUID { get; }
+        internal abstract Port FlowIn { get; }
+        internal abstract Port FlowOut { get; }
 
         protected StoryGraphView view;
 
@@ -19,12 +19,12 @@ namespace Hamstory.Editor
         }
     }
 
-    public abstract class GraphNode<T> : GraphNode where T : NodeData
+    internal abstract class GraphNode<T> : GraphNode where T : NodeData
     {
-        public T Data { get; private set; }
-        public override string GUID => Data.GUID;
+        internal T Data { get; private set; }
+        internal override string GUID => Data.GUID;
 
-        public GraphNode(StoryGraphView view, T data) : base(view)
+        internal GraphNode(StoryGraphView view, T data) : base(view)
         {
             Data = data;
             SetPosition(new(data.Pos, Vector2.zero));
@@ -81,26 +81,26 @@ namespace Hamstory.Editor
         }
     }
 
-    public class StartNode : GraphNode<NodeData>
+    internal class StartNode : GraphNode<NodeData>
     {
-        public override Port FlowOut => port;
-        public override Port FlowIn => null;
+        internal override Port FlowOut => port;
+        internal override Port FlowIn => null;
         private Port port;
 
-        public StartNode(StoryGraphView view, NodeData data) : base(view, data)
+        internal StartNode(StoryGraphView view, NodeData data) : base(view, data)
         {
             title = "开始";
             port = CreateFlowOutPort();
         }
     }
 
-    public class EndNode : GraphNode<NodeData>
+    internal class EndNode : GraphNode<NodeData>
     {
-        public override Port FlowIn => port;
-        public override Port FlowOut => null;
+        internal override Port FlowIn => port;
+        internal override Port FlowOut => null;
         private Port port;
 
-        public EndNode(StoryGraphView view, NodeData data) : base(view, data)
+        internal EndNode(StoryGraphView view, NodeData data) : base(view, data)
         {
             title = "结束";
             port = CreateFlowInPort();

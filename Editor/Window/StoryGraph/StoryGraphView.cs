@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 
 namespace Hamstory.Editor
 {
-    public class StoryGraphView : GraphView
+    internal class StoryGraphView : GraphView
     {
         internal StoryGraphViewModel viewModel;
         private static CopiedGraphData copiedData;
@@ -294,9 +294,9 @@ namespace Hamstory.Editor
         private Vector2 GetMousePosition(Vector2 world)
             => contentViewContainer.WorldToLocal(world);
 
-        public void Save() => window.SaveChanges();
+        internal void Save() => window.SaveChanges();
 
-        public void OnNodeAdded(NodeData data)
+        internal void OnNodeAdded(NodeData data)
         {
             if (nodes.Any(i => i is GraphNode node && node.GUID == data.GUID)) return;
             switch (data)
@@ -316,14 +316,14 @@ namespace Hamstory.Editor
             DeleteElements(nodes.Where(i => i is GraphNode node && guids.Contains(node.GUID)));
         }
 
-        public void OnNodeMoved(string id, Vector2 pos)
+        internal void OnNodeMoved(string id, Vector2 pos)
         {
             var node = nodes.Where(i => i is GraphNode node && node.GUID == id)
                 .FirstOrDefault();
             if (node != null) node.SetPosition(new(pos, node.GetPosition().size));
         }
 
-        public void OnEdgeAdded(ConnectionData data)
+        internal void OnEdgeAdded(ConnectionData data)
         {
             if (!edges.Any(i => i.Match(data)))
                 AddConn(data);
@@ -334,7 +334,7 @@ namespace Hamstory.Editor
             DeleteElements(edges.Where(i => i.Match(data)));
         }
 
-        public void Select(List<ISelectable> selections)
+        internal void Select(List<ISelectable> selections)
         {
             ClearSelection();
             selections.ForEach(i => AddToSelection(i));

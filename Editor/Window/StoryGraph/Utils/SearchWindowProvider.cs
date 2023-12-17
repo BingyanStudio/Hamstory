@@ -7,9 +7,9 @@ using System;
 
 namespace Hamstory
 {
-    public class SearchWindowProvider : ScriptableObject, ISearchWindowProvider
+    internal class SearchWindowProvider : ScriptableObject, ISearchWindowProvider
     {
-        public event Action<string, Vector2> Selected;
+        internal event Action<string, Vector2> Selected;
 
         public List<SearchTreeEntry> CreateSearchTree(SearchWindowContext context)
         {

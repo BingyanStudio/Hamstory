@@ -5,18 +5,18 @@ using UnityEngine.UIElements;
 
 namespace Hamstory.Editor
 {
-    public class SubGraphNode : GraphNode<SubGraphNodeData>
+    internal class SubGraphNode : GraphNode<SubGraphNodeData>
     {
         private ObjectField graphField;
 
         private Port flowIn, flowOut;
         private Button btnEdit;
 
-        public override Port FlowIn => flowIn;
-        public override Port FlowOut => flowOut;
+        internal override Port FlowIn => flowIn;
+        internal override Port FlowOut => flowOut;
 
 
-        public SubGraphNode(StoryGraphView view, SubGraphNodeData data) : base(view, data)
+        internal SubGraphNode(StoryGraphView view, SubGraphNodeData data) : base(view, data)
         {
             title = "故事链";
             BuildLayout();
@@ -66,7 +66,7 @@ namespace Hamstory.Editor
             }
         }
 
-        public void SetSubgraph(StoryGraph subgraph)
+        internal void SetSubgraph(StoryGraph subgraph)
         {
             UpdateGraph(Data.Subgraph, subgraph);
             graphField.value = subgraph;

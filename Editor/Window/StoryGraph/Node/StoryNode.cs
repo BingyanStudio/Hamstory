@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Hamstory.Editor
 {
-    public class StoryNode : GraphNode<StoryNodeData>
+    internal class StoryNode : GraphNode<StoryNodeData>
     {
         private ObjectField storyField;
         private List<VisualElement> mutableEls = new();
@@ -19,11 +19,11 @@ namespace Hamstory.Editor
 
         private Button btnReparse;
 
-        public override Port FlowIn => flowIn;
+        internal override Port FlowIn => flowIn;
 
-        public override Port FlowOut => flowOut;
+        internal override Port FlowOut => flowOut;
 
-        public StoryNode(StoryGraphView view, StoryNodeData data) : base(view, data)
+        internal StoryNode(StoryGraphView view, StoryNodeData data) : base(view, data)
         {
             title = "故事";
             BuildLayout();
@@ -175,7 +175,7 @@ namespace Hamstory.Editor
             return savedList;
         }
 
-        public void SetStory(TextAsset story)
+        internal void SetStory(TextAsset story)
         {
             storyField.value = story;
             Data.StoryText = story;

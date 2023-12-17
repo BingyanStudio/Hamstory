@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace Hamstory.Editor
 {
-    public class GraphEdgeConnector : IEdgeConnectorListener
+    internal class GraphEdgeConnector : IEdgeConnectorListener
     {
         private StoryGraphView view;
 
-        public GraphEdgeConnector(StoryGraphView view)
+        internal GraphEdgeConnector(StoryGraphView view)
         {
             this.view = view;
         }
