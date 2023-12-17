@@ -12,7 +12,10 @@ namespace Hamstory.Editor
             this.view = view;
         }
 
-        public void OnDrop(GraphView graphView, Edge edge) { }
+        public void OnDrop(GraphView graphView, Edge edge)
+        {
+            (graphView as StoryGraphView).viewModel.AddConn(edge.ToConnData(), false);
+        }
 
         public void OnDropOutsidePort(Edge edge, Vector2 position)
         {

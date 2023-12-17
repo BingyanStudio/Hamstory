@@ -8,6 +8,8 @@ namespace Hamstory
     [CreateAssetMenu(fileName = "StoryGraph", menuName = "Hamstory/StoryGraph")]
     public class StoryGraph : ScriptableObject
     {
+        public const string DEFAULT_PORT_NAME = "→";
+
         [SerializeField] private NodeData startNode, endNode;
         [SerializeField] private List<StoryNodeData> storyNodes = new();
         [SerializeField] private List<SubGraphNodeData> subNodes = new();
@@ -15,9 +17,9 @@ namespace Hamstory
 
         public NodeData StartNode { get => startNode; set => startNode = value; }
         public NodeData EndNode { get => endNode; set => endNode = value; }
-        public List<ConnectionData> Connections { get => connections; }
+        public List<ConnectionData> Conns { get => connections; }
         public List<StoryNodeData> StoryNodes { get => storyNodes; set => storyNodes = value; }
-        public List<SubGraphNodeData> SubNodes { get => subNodes; set => subNodes = value; }
+        public List<SubGraphNodeData> SubGraphNodes { get => subNodes; set => subNodes = value; }
 
         public NodeData GetOutputNode(ConnectionData conn)
         {
@@ -146,6 +148,12 @@ namespace Hamstory
             ToGUID = toGUID;
             ToPortName = toPortName;
         }
+
+        public bool ValueEquals(ConnectionData data)
+            => fromGUID == data.fromGUID
+                && fromPortName == data.fromPortName
+                && toGUID == data.toGUID
+                && toPortName == data.toPortName;
 
         public ConnectionData Clone(string fromGUID, string toGUID)
             => new(fromGUID, fromPortName, toGUID, toPortName);
