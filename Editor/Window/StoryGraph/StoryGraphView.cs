@@ -19,9 +19,6 @@ namespace Hamstory.Editor
         private EndNode endNode;
 
         internal GraphEdgeConnector Connector { get; private set; }
-        private Port pendingPort;
-
-        private SearchWindowProvider searchProvider;
 
         internal StoryGraphView(StoryGraphWindow window)
         {
@@ -37,16 +34,13 @@ namespace Hamstory.Editor
             this.AddManipulator(new RectangleSelector());
             this.AddManipulator(new StoryDragManipulator(this));
 
-            Connector = new GraphEdgeConnector(this);
-            searchProvider = SearchWindowProvider.CreateInstance<SearchWindowProvider>();
-            searchProvider.Selected += OnSearchSelected;
-
             graphViewChanged += OnGraphChanged;
         }
 
         internal void Init(StoryGraphViewModel viewModel)
         {
             this.viewModel = viewModel;
+            Connector = new GraphEdgeConnector(viewModel);
             viewModel.Bind(this);
         }
 
@@ -197,36 +191,6 @@ namespace Hamstory.Editor
                     }
                 }
             }
-        }
-
-        internal void ShowSearchWindow(Vector2 pos, Edge targetEdge)
-        {
-            pendingPort = targetEdge.input ?? targetEdge.output;
-            SearchWindow.Open(new(pos + window.position.position), searchProvider);
-        }
-
-        private void OnSearchSelected(string path, Vector2 pos)
-        {
-            pos -= window.position.position;
-            pos = contentViewContainer.WorldToLocal(pos);
-
-            if (pendingPort.direction == Direction.Input) pos.x -= 350;
-
-            string newGUID;
-            if (path.EndsWith(".asset"))
-            {
-                var graph = AssetDatabase.LoadAssetAtPath<StoryGraph>(path);
-                newGUID = viewModel.CreateSubGraphNode(pos, graph);
-            }
-            else
-            {
-                var text = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
-                newGUID = viewModel.CreateStoryNode(pos, text);
-            }
-
-            if (pendingPort.direction == Direction.Input)
-                viewModel.AddConn(new(newGUID, StoryGraph.DEFAULT_PORT_NAME, ((GraphNode)pendingPort.node).GUID, pendingPort.portName));
-            else viewModel.AddConn(new(((GraphNode)pendingPort.node).GUID, pendingPort.portName, newGUID, StoryGraph.DEFAULT_PORT_NAME));
         }
 
         internal StoryNode AddStoryNode(StoryNodeData data)

@@ -12,16 +12,24 @@ namespace Hamstory.Editor
 
         private StoryGraph graph;
         private StoryGraphView view;
+        private StoryGraphWindow window;
 
         private Stack<StoryGraphOperation> operations = new();
         private StoryGraphOperation opBatch;
         private bool undoing = false;
 
-        internal StoryGraphViewModel(StoryGraph graph)
+        private SearchWindowProvider searchProvider;
+        private Port pendingPort;
+
+        internal StoryGraphViewModel(StoryGraph graph, StoryGraphWindow window)
         {
             this.graph = graph;
+            this.window = window;
 
             opBatch = new(this);
+
+            searchProvider = SearchWindowProvider.CreateInstance<SearchWindowProvider>();
+            searchProvider.Selected += OnSearchSelected;
 
             // 若是新的graph，则初始化节点
             if (graph.StartNode.GUID.Length == 0) graph.StartNode = new NodeData(GUID.Generate().ToString(), new(100, 200));
@@ -34,13 +42,55 @@ namespace Hamstory.Editor
             view.InitGraph(graph);
         }
 
+        internal void ShowSearchWindow(Vector2 pos, Edge targetEdge)
+        {
+            pendingPort = targetEdge.input ?? targetEdge.output;
+            SearchWindow.Open(new(pos + window.position.position), searchProvider);
+        }
+
+        private void OnSearchSelected(string path, Vector2 pos)
+        {
+            pos -= window.position.position;
+            pos = view.GetMousePosition(pos);
+
+            if (pendingPort.direction == Direction.Input) pos.x -= 350;
+
+            string newGUID;
+            if (path.EndsWith(".asset"))
+            {
+                var graph = AssetDatabase.LoadAssetAtPath<StoryGraph>(path);
+                newGUID = _CreateSubGraphNode(pos, graph);
+            }
+            else
+            {
+                var text = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
+                newGUID = _CreateStoryNode(pos, text);
+            }
+
+            if (pendingPort.direction == Direction.Input)
+                _AddConn(new(newGUID, StoryGraph.DEFAULT_PORT_NAME, ((GraphNode)pendingPort.node).GUID, pendingPort.portName));
+            else
+            {
+                var conn = pendingPort.connections.FirstOrDefault();
+                if (conn != null) _RemoveConn(conn.ToConnData());
+                _AddConn(new(((GraphNode)pendingPort.node).GUID, pendingPort.portName, newGUID, StoryGraph.DEFAULT_PORT_NAME));
+            }
+            PushOperation();
+        }
+
         internal string CreateStoryNode(Vector2 pos) => CreateStoryNode(pos, null);
 
         internal string CreateStoryNode(Vector2 pos, TextAsset text)
         {
+            var guid = _CreateStoryNode(pos, text);
+            PushOperation();
+            return guid;
+        }
+
+        private string _CreateStoryNode(Vector2 pos, TextAsset text)
+        {
             var guid = GUID.Generate().ToString();
             _AddStoryNode(new(guid, pos) { StoryText = text });
-            PushOperation();
             return guid;
         }
 
@@ -56,12 +106,18 @@ namespace Hamstory.Editor
 
         internal string CreateSubGraphNode(Vector2 pos, StoryGraph graph)
         {
+            var guid = _CreateSubGraphNode(pos, graph);
+            PushOperation();
+            return guid;
+        }
+
+        private string _CreateSubGraphNode(Vector2 pos, StoryGraph graph)
+        {
             var guid = GUID.Generate().ToString();
             _AddSubGraphNode(new(guid, pos)
             {
                 Subgraph = graph
             });
-            PushOperation();
             return guid;
         }
 
@@ -122,7 +178,6 @@ namespace Hamstory.Editor
             if (opBatch.MovedNodes.ContainsKey(node.GUID))
                 opBatch.MovedNodes[node.GUID] = origin;
             else opBatch.MovedNodes[node.GUID] = origin;
-            // opBatch.MovedNodes[node.GUID] = origin;
 
             if (updateView) view.OnNodeMoved(node.GUID, pos);
         }
@@ -251,6 +306,8 @@ namespace Hamstory.Editor
         private void PushOperation()
         {
             if (undoing) return;
+
+            Debug.Log($"push: {opBatch.AddedNodes.Count}, {opBatch.AddedConns.Count}, {opBatch.RemovedNodes.Count}, {opBatch.RemovedConns.Count}, {opBatch.MovedNodes.Count}");
 
             operations.Push(opBatch);
             opBatch = new(this);

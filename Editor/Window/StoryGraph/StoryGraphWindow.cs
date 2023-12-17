@@ -73,7 +73,7 @@ namespace Hamstory.Editor
         {
             this.graph = graph;
 
-            graphViewModel = new(graph);
+            graphViewModel = new(graph, this);
             graphView.Init(graphViewModel);
         }
 

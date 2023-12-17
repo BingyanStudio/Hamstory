@@ -5,11 +5,11 @@ namespace Hamstory.Editor
 {
     internal class GraphEdgeConnector : IEdgeConnectorListener
     {
-        private StoryGraphView view;
+        private StoryGraphViewModel viewModel;
 
-        internal GraphEdgeConnector(StoryGraphView view)
+        internal GraphEdgeConnector(StoryGraphViewModel viewModel)
         {
-            this.view = view;
+            this.viewModel = viewModel;
         }
 
         public void OnDrop(GraphView graphView, Edge edge)
@@ -19,7 +19,7 @@ namespace Hamstory.Editor
 
         public void OnDropOutsidePort(Edge edge, Vector2 position)
         {
-            view.ShowSearchWindow(position, edge);
+            viewModel.ShowSearchWindow(position, edge);
         }
     }
 }
