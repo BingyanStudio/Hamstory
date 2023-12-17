@@ -34,6 +34,11 @@ namespace Hamstory.Editor
                 Close();
         }
 
+        private void OnFocus()
+        {
+            if (graphView != null) graphView.NotifyStoryNodeReparse();
+        }
+
         private void OnDestroy()
         {
             if (graph) windows.Remove(graph);
