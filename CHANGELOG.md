@@ -31,3 +31,14 @@
 * `StoryChainExecutor` 改名为 `StoryGraphExecutor`
 * 现在 `DataProvider` 为 `StoryExecutorBase` 的非必须参数
 * 创建 `.hamstory` 文件时，现在默认使用 `TextAsset` 的图标了
+
+## [0.0.1-beta4] - 2023-12-17
+### 新增
+* 现在可以直接从文件中拖拽故事脚本或节点图进入节点图编辑器了
+
+### 修改
+* 使用 MVVC 架构重构了大部分节点图编辑器
+* 修改了部分不必要成员的可见性为 `internal`
+
+### 修复
+* 修复了部分操作的撤销不正确的问题
