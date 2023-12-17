@@ -9,6 +9,7 @@ namespace Hamstory
     public class StoryGraph : ScriptableObject
     {
         public const string DEFAULT_PORT_NAME = "→";
+        public const string SCRIPT_EXTENSION = ".hamstory";
 
         [SerializeField] private NodeData startNode, endNode;
         [SerializeField] private List<StoryNodeData> storyNodes = new();

@@ -35,6 +35,7 @@ namespace Hamstory.Editor
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new ContentDragger());
             this.AddManipulator(new RectangleSelector());
+            this.AddManipulator(new StoryDragManipulator(this));
 
             Connector = new GraphEdgeConnector(this);
             searchProvider = SearchWindowProvider.CreateInstance<SearchWindowProvider>();
@@ -291,7 +292,7 @@ namespace Hamstory.Editor
             return edge;
         }
 
-        private Vector2 GetMousePosition(Vector2 world)
+        internal Vector2 GetMousePosition(Vector2 world)
             => contentViewContainer.WorldToLocal(world);
 
         internal void Save() => window.SaveChanges();
