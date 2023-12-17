@@ -9,7 +9,7 @@ namespace Hamstory.Editor
     {
         private static Dictionary<StoryGraph, StoryGraphWindow> windows = new();
 
-        public static void ShowWindow(StoryGraph source)
+        internal static void ShowWindow(StoryGraph source)
         {
             if (windows.ContainsKey(source)) windows[source].Focus();
             else
