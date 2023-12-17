@@ -8,25 +8,19 @@ using UnityEngine.UIElements;
 
 namespace Hamstory.Editor
 {
-    public class StoryGraphView : GraphView
+    internal class StoryGraphView : GraphView
     {
+        internal StoryGraphViewModel viewModel;
         private static CopiedGraphData copiedData;
 
         private StoryGraphWindow window;
 
         private StartNode startNode;
         private EndNode endNode;
-        private StoryGraph graph;
-
-        private Stack<StoryGraphOperation> ops = new();
-        private bool deletionForUndo = false;
 
         internal GraphEdgeConnector Connector { get; private set; }
-        private Port pendingPort;
 
-        private SearchWindowProvider searchProvider;
-
-        public StoryGraphView(StoryGraphWindow window)
+        internal StoryGraphView(StoryGraphWindow window)
         {
             this.window = window;
 
@@ -38,25 +32,20 @@ namespace Hamstory.Editor
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new ContentDragger());
             this.AddManipulator(new RectangleSelector());
-
-            Connector = new GraphEdgeConnector(this);
-            searchProvider = SearchWindowProvider.CreateInstance<SearchWindowProvider>();
-            searchProvider.Selected += OnSearchSelected;
+            this.AddManipulator(new StoryDragManipulator(this));
 
             graphViewChanged += OnGraphChanged;
         }
 
-        public void Init(StoryGraph graph)
+        internal void Init(StoryGraphViewModel viewModel)
         {
-            this.graph = graph;
-            BuildGraph();
+            this.viewModel = viewModel;
+            Connector = new GraphEdgeConnector(viewModel);
+            viewModel.Bind(this);
         }
 
-        private void BuildGraph()
+        internal void InitGraph(StoryGraph graph)
         {
-            if (graph.StartNode.GUID.Length == 0) graph.StartNode = new NodeData(GUID.Generate().ToString(), new(100, 200));
-            if (graph.EndNode.GUID.Length == 0) graph.EndNode = new NodeData(GUID.Generate().ToString(), new(600, 200));
-
             startNode = new StartNode(this, graph.StartNode);
             endNode = new EndNode(this, graph.EndNode);
 
@@ -68,16 +57,16 @@ namespace Hamstory.Editor
                 switch (i)
                 {
                     case StoryNodeData sn:
-                        BuildStoryNode(sn);
+                        AddStoryNode(sn);
                         break;
 
                     case SubGraphNodeData gn:
-                        BuildSubGraphNode(gn);
+                        AddSubGraphNode(gn);
                         break;
                 }
             });
 
-            BuildConns(graph.Connections);
+            BuildConns(graph.Conns);
         }
 
         public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
@@ -92,33 +81,22 @@ namespace Hamstory.Editor
                 if (c.elementsToRemove.Contains(startNode)) c.elementsToRemove.Remove(startNode);
                 if (c.elementsToRemove.Contains(endNode)) c.elementsToRemove.Remove(endNode);
 
-                var nodesToRemove = new List<NodeData>();
+                var nodesToRemove = new List<string>();
                 var edgesToRemove = new List<ConnectionData>();
                 c.elementsToRemove.ForEach(i =>
                 {
                     if (i is GraphNode node)
-                    {
-                        var nodeToRemove = graph.GetNode(node.GUID);
-                        nodesToRemove.Add(nodeToRemove);
-                        graph.RemoveNode(nodeToRemove);
-                    }
+                        nodesToRemove.Add(node.GUID);
 
                     else if (i is Edge edge)
-                    {
-                        var data = GetConnDataByEdge(edge);
-                        edgesToRemove.Add(data);
+                        edgesToRemove.Add(edge.ToConnData());
 
-                        graph.Connections.Remove(data);
-                    }
                 });
 
-                if (!deletionForUndo)
-                {
-                    PushOperation(new RemoveOperation(this, graph, nodesToRemove, edgesToRemove));
-                    deletionForUndo = false;
-                }
+                viewModel.ApplyRemoveChanges(nodesToRemove, edgesToRemove);
             }
 
+            List<(string, Vector2)> movedNodes = new();
             if (c.movedElements != null)
             {
                 c.movedElements.ForEach(i =>
@@ -126,33 +104,23 @@ namespace Hamstory.Editor
                     switch (i)
                     {
                         case StartNode start:
-                            PushOperation(new MoveOperation(this, start, graph.StartNode, graph.StartNode.Pos));
-                            graph.StartNode.Pos = start.GetPosition().position;
+                            movedNodes.Add((start.GUID, i.GetPosition().position));
                             break;
 
                         case EndNode end:
-                            PushOperation(new MoveOperation(this, end, graph.EndNode, graph.EndNode.Pos));
-                            graph.EndNode.Pos = end.GetPosition().position;
+                            movedNodes.Add((end.GUID, i.GetPosition().position));
                             break;
 
-                        case StoryNode node:
-                            MoveGraphNode(node);
+                        case StoryNode story:
+                            movedNodes.Add((story.GUID, i.GetPosition().position));
                             break;
 
-                        case SubGraphNode sgn:
-                            MoveGraphNode(sgn);
+                        case SubGraphNode sub:
+                            movedNodes.Add((sub.GUID, i.GetPosition().position));
                             break;
                     }
                 });
-            }
-
-            if (c.edgesToCreate != null)
-            {
-                c.edgesToCreate.ForEach(i =>
-                {
-                    graph.Connections.Add(CreateConnData(i.output, i.input));
-                    PushOperation(new CreateOperation(this, i));
-                });
+                viewModel.MoveNodes(movedNodes, false);
             }
 
             Save();
@@ -165,23 +133,23 @@ namespace Hamstory.Editor
 
             evt.menu.ClearItems();
 
-            evt.menu.AppendAction("复制", a => CopySelection(),
+            evt.menu.AppendAction("复制", a => viewModel.Copy(selection),
                 selection.Count == 0 ? DropdownMenuAction.Status.Disabled : DropdownMenuAction.Status.Normal);
 
-            evt.menu.AppendAction("剪切", a => { CopySelection(); DeleteSelection(); },
+            evt.menu.AppendAction("剪切", a => { viewModel.Copy(selection); DeleteSelection(); },
                 selection.Count == 0 ? DropdownMenuAction.Status.Disabled : DropdownMenuAction.Status.Normal);
 
-            evt.menu.AppendAction("粘贴", a => Paste(GetMousePosition(a.eventInfo.localMousePosition)),
+            evt.menu.AppendAction("粘贴", a => viewModel.Paste(GetMousePosition(a.eventInfo.localMousePosition)),
                 copiedData == null ? DropdownMenuAction.Status.Disabled : DropdownMenuAction.Status.Normal);
 
-            evt.menu.AppendAction("克隆", a => { CopySelection(); Paste(Vector2.one * 30, true); },
+            evt.menu.AppendAction("克隆", a => { viewModel.Copy(selection); viewModel.Paste(Vector2.one * 30, true); },
                 selection.Count == 0 ? DropdownMenuAction.Status.Disabled : DropdownMenuAction.Status.Normal);
 
             evt.menu.AppendSeparator();
 
-            evt.menu.AppendAction("添加故事脚本", a => CreateStoryNode(GetMousePosition(a.eventInfo.localMousePosition)));
+            evt.menu.AppendAction("添加故事脚本", a => viewModel.CreateStoryNode(GetMousePosition(a.eventInfo.localMousePosition)));
 
-            evt.menu.AppendAction("添加故事节点图", a => CreateSubGraphNode(GetMousePosition(a.eventInfo.localMousePosition)));
+            evt.menu.AppendAction("添加故事节点图", a => viewModel.CreateSubGraphNode(GetMousePosition(a.eventInfo.localMousePosition)));
         }
 
         protected override void ExecuteDefaultAction(EventBase evt)
@@ -196,118 +164,36 @@ namespace Hamstory.Editor
                     {
                         case KeyCode.Z:
                             key.StopPropagation();
-                            if (ops.Count > 0) ops.Pop().Undo();
+                            viewModel.Undo();
                             break;
 
                         case KeyCode.C:
                             key.StopPropagation();
-                            CopySelection();
+                            viewModel.Copy(selection);
                             break;
 
                         case KeyCode.V:
                             key.StopPropagation();
-                            Paste(GetMousePosition(evt.originalMousePosition));
+                            viewModel.Paste(GetMousePosition(evt.originalMousePosition));
                             break;
 
                         case KeyCode.X:
                             key.StopPropagation();
-                            CopySelection();
+                            viewModel.Copy(selection);
                             DeleteSelection();
                             break;
 
                         case KeyCode.D:
                             key.StopPropagation();
-                            CopySelection();
-                            Paste(Vector2.one * 30, true);
+                            viewModel.Copy(selection);
+                            viewModel.Paste(Vector2.one * 30, true);
                             break;
                     }
                 }
             }
         }
 
-        public void PushOperation(StoryGraphOperation op)
-        {
-            ops.Push(op);
-        }
-
-        private void CopySelection()
-        {
-            var nodes = selection.Where(i => i is GraphNode node && node != startNode && node != endNode).Cast<GraphNode>().Select(i => i.GUID);
-            var conns = selection.Where(i => i is Edge edge).Cast<Edge>();
-
-            var nodeDatas = graph.GetNodes(i => nodes.Contains(i.GUID)).ToList();
-            var connDatas = conns.Select(i => GetConnDataByEdge(i)).ToList();
-            if (nodeDatas.Count == 0) return;
-
-            copiedData = new(nodeDatas, connDatas);
-        }
-
-        private void Paste(Vector2 pos, bool relative = false)
-        {
-            if (copiedData != null)
-            {
-                ClearSelection();
-                copiedData.Paste(this, graph, pos, relative).ForEach(i => AddToSelection(i));
-            }
-        }
-
-        internal void ShowSearchWindow(Vector2 pos, Edge targetEdge)
-        {
-            pendingPort = targetEdge.input ?? targetEdge.output;
-            SearchWindow.Open(new(pos + window.position.position), searchProvider);
-        }
-
-        private void OnSearchSelected(string path, Vector2 pos)
-        {
-            pos -= window.position.position;
-            pos = contentViewContainer.WorldToLocal(pos);
-
-            if (pendingPort.direction == Direction.Input) pos.x -= 350;
-
-            GraphNode node;
-            if (path.EndsWith(".asset"))
-            {
-                var graph = AssetDatabase.LoadAssetAtPath<StoryGraph>(path);
-                var gn = CreateSubGraphNode(pos);
-                gn.SetSubgraph(graph);
-                node = gn;
-            }
-            else
-            {
-                var text = AssetDatabase.LoadAssetAtPath<TextAsset>(path);
-                var gn = CreateStoryNode(pos);
-                gn.SetStory(text);
-                node = gn;
-            }
-
-            Edge conn;
-            if (pendingPort.direction == Direction.Input)
-            {
-                conn = ConnectPort(node.FlowOut, pendingPort);
-                graph.Connections.Add(CreateConnData(node.FlowOut, pendingPort));
-            }
-            else
-            {
-                DeleteElements(pendingPort.connections);
-                conn = ConnectPort(pendingPort, node.FlowIn);
-                graph.Connections.Add(CreateConnData(pendingPort, node.FlowIn));
-            }
-
-            PushOperation(new CreateOperation(this, node, conn));
-        }
-
-        internal StoryNode CreateStoryNode(Vector2 pos)
-        {
-            var data = new StoryNodeData(GUID.Generate().ToString(), pos);
-            var node = BuildStoryNode(data);
-            graph.StoryNodes.Add(data);
-            Save();
-
-            PushOperation(new CreateOperation(this, node));
-            return node;
-        }
-
-        internal StoryNode BuildStoryNode(StoryNodeData data)
+        internal StoryNode AddStoryNode(StoryNodeData data)
         {
             var node = new StoryNode(this, data);
             AddElement(node);
@@ -315,17 +201,7 @@ namespace Hamstory.Editor
             return node;
         }
 
-        internal SubGraphNode CreateSubGraphNode(Vector2 pos)
-        {
-            var data = new SubGraphNodeData(GUID.Generate().ToString(), pos);
-            var node = BuildSubGraphNode(data);
-            graph.SubNodes.Add(data);
-
-            PushOperation(new CreateOperation(this, node));
-            return node;
-        }
-
-        internal SubGraphNode BuildSubGraphNode(SubGraphNodeData data)
+        internal SubGraphNode AddSubGraphNode(SubGraphNodeData data)
         {
             var node = new SubGraphNode(this, data);
             AddElement(node);
@@ -341,11 +217,11 @@ namespace Hamstory.Editor
                     switch (i)
                     {
                         case StoryNodeData story:
-                            results.Add(BuildStoryNode(story));
+                            results.Add(AddStoryNode(story));
                             break;
 
                         case SubGraphNodeData sub:
-                            results.Add(BuildSubGraphNode(sub));
+                            results.Add(AddSubGraphNode(sub));
                             break;
                     }
                 });
@@ -357,14 +233,20 @@ namespace Hamstory.Editor
             var results = new List<Edge>();
             data.ForEach(i =>
             {
-                var output = ports.FirstOrDefault(j => j.direction == Direction.Output && ((GraphNode)j.node).GUID == i.FromGUID && j.portName == i.FromPortName);
-                var input = ports.FirstOrDefault(j => j.direction == Direction.Input && ((GraphNode)j.node).GUID == i.ToGUID && j.portName == i.ToPortName);
-
-                if (input == null || output == null) return;
-
-                results.Add(ConnectPort(output, input));
+                var result = AddConn(i);
+                if (result != null)
+                    results.Add(result);
             });
             return results;
+        }
+
+        private Edge AddConn(ConnectionData data)
+        {
+            var output = ports.FirstOrDefault(j => j.direction == Direction.Output && ((GraphNode)j.node).GUID == data.FromGUID && j.portName == data.FromPortName);
+            var input = ports.FirstOrDefault(j => j.direction == Direction.Input && ((GraphNode)j.node).GUID == data.ToGUID && j.portName == data.ToPortName);
+
+            if (input == null || output == null) return null;
+            return ConnectPort(output, input);
         }
 
         private Edge ConnectPort(Port from, Port to)
@@ -374,35 +256,53 @@ namespace Hamstory.Editor
             return edge;
         }
 
-        private ConnectionData CreateConnData(Port from, Port to)
-            => new(((GraphNode)from.node).GUID, from.portName, ((GraphNode)to.node).GUID, to.portName);
-
-        private ConnectionData GetConnDataByEdge(Edge edge)
-        {
-            return graph.Connections.Where(j =>
-                j.FromGUID == ((GraphNode)edge.output.node).GUID
-                && j.FromPortName == edge.output.portName
-                && j.ToGUID == ((GraphNode)edge.input.node).GUID
-                && j.ToPortName == edge.input.portName)
-                .FirstOrDefault();
-        }
-
-        private void MoveGraphNode(GraphNode node)
-        {
-            var target = graph.GetNode(node.GUID);
-            if (target == null) return;
-            PushOperation(new MoveOperation(this, node, target, target.Pos));
-            target.Pos = node.GetPosition().position;
-        }
-
-        internal void MarkDeletionAsUndo()
-        {
-            deletionForUndo = true;
-        }
-
-        private Vector2 GetMousePosition(Vector2 world)
+        internal Vector2 GetMousePosition(Vector2 world)
             => contentViewContainer.WorldToLocal(world);
 
-        public void Save() => window.SaveChanges();
+        internal void Save() => window.SaveChanges();
+
+        internal void OnNodeAdded(NodeData data)
+        {
+            if (nodes.Any(i => i is GraphNode node && node.GUID == data.GUID)) return;
+            switch (data)
+            {
+                case StoryNodeData story:
+                    AddStoryNode(story);
+                    break;
+
+                case SubGraphNodeData sub:
+                    AddSubGraphNode(sub);
+                    break;
+            }
+        }
+
+        internal void OnNodeRemoved(List<string> guids)
+        {
+            DeleteElements(nodes.Where(i => i is GraphNode node && guids.Contains(node.GUID)));
+        }
+
+        internal void OnNodeMoved(string id, Vector2 pos)
+        {
+            var node = nodes.Where(i => i is GraphNode node && node.GUID == id)
+                .FirstOrDefault();
+            if (node != null) node.SetPosition(new(pos, node.GetPosition().size));
+        }
+
+        internal void OnEdgeAdded(ConnectionData data)
+        {
+            if (!edges.Any(i => i.Match(data)))
+                AddConn(data);
+        }
+
+        internal void OnEdgeRemoved(ConnectionData data)
+        {
+            DeleteElements(edges.Where(i => i.Match(data)));
+        }
+
+        internal void Select(List<ISelectable> selections)
+        {
+            ClearSelection();
+            selections.ForEach(i => AddToSelection(i));
+        }
     }
 }

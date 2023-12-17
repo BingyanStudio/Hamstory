@@ -9,7 +9,7 @@ namespace Hamstory.Editor
     {
         private static Dictionary<StoryGraph, StoryGraphWindow> windows = new();
 
-        public static void ShowWindow(StoryGraph source)
+        internal static void ShowWindow(StoryGraph source)
         {
             if (windows.ContainsKey(source)) windows[source].Focus();
             else
@@ -20,8 +20,10 @@ namespace Hamstory.Editor
             }
         }
 
-        private StoryGraphView graphView;
         private StoryGraph graph;
+        private StoryGraphView graphView;
+        private StoryGraphViewModel graphViewModel;
+
 
         [SerializeField]
         private StyleSheet m_StyleSheet = default;
@@ -70,7 +72,9 @@ namespace Hamstory.Editor
         private void Init(StoryGraph graph)
         {
             this.graph = graph;
-            graphView.Init(graph);
+
+            graphViewModel = new(graph, this);
+            graphView.Init(graphViewModel);
         }
 
         public override void SaveChanges()
