@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,5 +16,12 @@ namespace Hamstory.Editor
         {
             this.viewModel = viewModel;
         }
+
+        internal bool IsEmpty()
+            => AddedNodes.Count == 0
+                && AddedConns.Count == 0
+                && RemovedNodes.Count == 0
+                && RemovedConns.Count == 0
+                && MovedNodes.Count == 0;
     }
 }

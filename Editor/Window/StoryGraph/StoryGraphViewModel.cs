@@ -16,7 +16,7 @@ namespace Hamstory.Editor
 
         private Stack<StoryGraphOperation> operations = new();
         private StoryGraphOperation opBatch;
-        private bool undoing = false;
+        private bool batching = false;
 
         private SearchWindowProvider searchProvider;
         private Port pendingPort;
@@ -53,6 +53,8 @@ namespace Hamstory.Editor
             pos -= window.position.position;
             pos = view.GetMousePosition(pos);
 
+            batching = true;
+
             if (pendingPort.direction == Direction.Input) pos.x -= 350;
 
             string newGUID;
@@ -75,6 +77,7 @@ namespace Hamstory.Editor
                 if (conn != null) _RemoveConn(conn.ToConnData());
                 _AddConn(new(((GraphNode)pendingPort.node).GUID, pendingPort.portName, newGUID, StoryGraph.DEFAULT_PORT_NAME));
             }
+            batching = false;
             PushOperation();
         }
 
@@ -231,7 +234,9 @@ namespace Hamstory.Editor
 
         private void _RemoveConn(ConnectionData data, bool updateView = true)
         {
-            graph.Conns.Remove(data);
+            graph.Conns.RemoveAll(i => i.ValueEquals(data));
+
+            if (opBatch.RemovedConns.Any(i => i.ValueEquals(data))) return;
             opBatch.RemovedConns.Add(data);
 
             if (updateView) view.OnEdgeRemoved(data);
@@ -245,7 +250,7 @@ namespace Hamstory.Editor
 
         private void _RemoveConns(List<ConnectionData> datas, bool updateView = true)
         {
-            datas.ForEach(i => _RemoveConn(i));
+            datas.ForEach(i => _RemoveConn(i, false));
             if (updateView) datas.ForEach(i => view.OnEdgeRemoved(i));
         }
 
@@ -287,7 +292,7 @@ namespace Hamstory.Editor
         {
             if (operations.Count > 0)
             {
-                undoing = true;
+                batching = true;
                 var op = operations.Pop();
 
                 _MoveNodes(op.MovedNodes.Select(i => (i.Key, i.Value)).ToList());
@@ -298,19 +303,19 @@ namespace Hamstory.Editor
                 _AddNodes(op.RemovedNodes);
                 _AddConns(op.RemovedConns);
 
-                undoing = false;
+                batching = false;
                 opBatch = new(this);
             }
         }
 
         private void PushOperation()
         {
-            if (undoing) return;
-
-            Debug.Log($"push: {opBatch.AddedNodes.Count}, {opBatch.AddedConns.Count}, {opBatch.RemovedNodes.Count}, {opBatch.RemovedConns.Count}, {opBatch.MovedNodes.Count}");
+            if (batching || opBatch.IsEmpty()) return;
 
             operations.Push(opBatch);
             opBatch = new(this);
+
+            view.Save();
         }
     }
 }

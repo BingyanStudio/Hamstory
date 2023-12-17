@@ -158,5 +158,15 @@ namespace Hamstory
 
         public ConnectionData Clone(string fromGUID, string toGUID)
             => new(fromGUID, fromPortName, toGUID, toPortName);
+
+        public override bool Equals(object obj)
+        {
+            return obj is ConnectionData data && ValueEquals(data);
+        }
+
+        public override int GetHashCode()
+        {
+            return fromGUID.GetHashCode() + fromPortName.GetHashCode() + toGUID.GetHashCode() + toPortName.GetHashCode();
+        }
     }
 }
