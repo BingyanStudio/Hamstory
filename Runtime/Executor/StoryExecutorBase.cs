@@ -88,6 +88,7 @@ namespace Hamstory
         public virtual void End()
         {
             StopCoroutine(coroutine);
+            running = false;
         }
 
         // 日志
