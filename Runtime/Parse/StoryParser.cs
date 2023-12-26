@@ -101,8 +101,6 @@ namespace Hamstory
                         Warn($"{i} 需要闭合，但并没有。这可能会带来意料意外的后果！\n请注意添加闭合符号 [/]");
                 });
 
-                // Debug.Log("解析结果: ");
-                // results.ForEach(i => Debug.Log($"{i.Indent}: {i.Sentence.GetType()}"));
                 story = new Story(results.Select(i => i).ToList(), characterDefs, jumps);
                 return true;
             }
