@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -52,7 +53,11 @@ namespace Hamstory
         public abstract void SetCharacter(string key, string extra = "");
         public virtual void ClearCharacter() => Visual.ClearCharacter();
         public virtual void SetText(string content) => Visual.SetText(this, Data ? Data.Serialize(this, content) : content);
-        public virtual void CreateMenu(List<MenuOption> options) => Visual.CreateMenu(this, options);
+        public virtual void CreateMenu(List<MenuOption> options) => Visual.CreateMenu(this, Data ? options.Select(i =>
+        {
+            i.Content = Data.Serialize(this, i.Content);
+            return i;
+        }).ToList() : options);
         public virtual void ClearMenu() => Visual.ClearMenu();
 
         // 处理变量
