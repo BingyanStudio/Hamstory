@@ -43,7 +43,7 @@ namespace Hamstory
         /// <summary>
         /// 最后一个语句的序号
         /// </summary>
-        public int LastSentenceIdx => results.Count-1;
+        public int LastSentenceIdx => results.Count - 1;
 
         private StoryParser(string filePath, string content)
         {
@@ -82,8 +82,11 @@ namespace Hamstory
                     else
                     {
                         var prefixs = prefixParsers.Where(i => line.StartsWith(i.Key.ToLower())).ToArray();
-                        if (prefixs.Length != 0)    // 交给前缀解析器
+                        if (prefixs.Length > 0)    // 交给前缀解析器
                         {
+                            if (prefixs.Length > 1)
+                                Warn($"有多个语句解析器与这一行匹配。选取 {prefixs[0].Value.GetType()} 进行解析");
+
                             var length = prefixs[0].Key.Length;
                             prefixs[0].Value.Parse(line.Substring(length, line.Length - length).Trim(), this);
                         }
