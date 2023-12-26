@@ -7,21 +7,30 @@ namespace Hamstory
 {
     public class StoryParser
     {
-        private static Dictionary<string, SentenceParser> commandParsers;
-        private static Dictionary<string, SentenceParser> prefixParsers;
+        private static List<SentenceParser> parsers;
+        private static SayParser sayParser = new();
+
         static StoryParser()
         {
             var types = typeof(StoryParser).Assembly.GetTypes();
-            var parsers = types.Where(i => !i.IsAbstract && i.IsSubclassOf(typeof(SentenceParser)))
+            parsers = types.Where(i => !i.IsAbstract && i.IsSubclassOf(typeof(SentenceParser)))
                         .Select(i => Activator.CreateInstance(i) as SentenceParser).ToList();
-            commandParsers = parsers.Where(i => i.IsCommand).ToDictionary(i => i.Header.ToLower(), i => i);
-            prefixParsers = parsers.Where(i => !i.IsCommand).ToDictionary(i => i.Header.ToLower(), i => i);
         }
 
-        public static SentenceParser GetSentenceParser(string command)
+        public static void RegisterParser(SentenceParser parser)
         {
-            if (!commandParsers.TryGetValue(command, out var value)) throw new Exception($"找不到与 [{command}] 对应的解析器！");
-            return value;
+            if (parser != null) parsers.Add(parser);
+        }
+
+        public static void UnregisterParser(SentenceParser parser)
+        {
+            if (parsers.Contains(parser))
+                parsers.Remove(parser);
+        }
+
+        public static void SetSayParser(SayParser parser)
+        {
+            if (parser != null) sayParser = parser;
         }
 
         public static bool Parse(string path, string content, out Story result)
@@ -52,63 +61,54 @@ namespace Hamstory
             lineIndex = 0;
         }
 
-        private bool Parse(out Story story) => Parse(new SayParser(), out story);
-
-        private bool Parse(SayParser sayParser, out Story story)
+        private bool Parse(out Story story)
         {
-            try
+            var commandParsers = parsers.Where(i => i.IsCommand).ToDictionary(i => i.Header.ToLower(), i => i);
+            var prefixParsers = parsers.Where(i => !i.IsCommand).ToDictionary(i => i.Header.ToLower(), i => i);
+
+            for (lineIndex = 0; lineIndex < contents.Length; lineIndex++)
             {
-                if (sayParser == null) sayParser = new SayParser();
+                // 空行，过！
+                if (this.line.Trim().Length == 0) continue;
 
-                for (lineIndex = 0; lineIndex < contents.Length; lineIndex++)
+                // 删除缩进空格
+                var line = this.line.Trim();
+
+                // 是个指令
+                if (line.StartsWith('['))
                 {
-                    // 空行，过！
-                    if (this.line.Trim().Length == 0) continue;
+                    int blockIndex = line.IndexOf(']');
+                    if (blockIndex == -1) Error("方括号没有闭合");
 
-                    // 删除缩进空格
-                    var line = this.line.Trim();
-
-                    // 是个指令
-                    if (line.StartsWith('['))
+                    var cmd = line.Substring(1, blockIndex - 1);
+                    var cmdLower = cmd.ToLower();
+                    if (!commandParsers.ContainsKey(cmdLower)) Error($"未知的标记: [{cmd}]");
+                    commandParsers[cmdLower].Parse(line.Substring(blockIndex + 1, line.Length - blockIndex - 1).Trim(), this);
+                }
+                else
+                {
+                    var prefixs = prefixParsers.Where(i => line.StartsWith(i.Key.ToLower())).ToArray();
+                    if (prefixs.Length > 0)    // 交给前缀解析器
                     {
-                        int blockIndex = line.IndexOf(']');
-                        if (blockIndex == -1) Error("方括号没有闭合");
+                        if (prefixs.Length > 1)
+                            Warn($"有多个语句解析器与这一行匹配。选取 {prefixs[0].Value.GetType()} 进行解析");
 
-                        var cmd = line.Substring(1, blockIndex - 1);
-                        var cmdLower = cmd.ToLower();
-                        if (!commandParsers.ContainsKey(cmdLower)) Error($"未知的标记: [{cmd}]");
-                        commandParsers[cmdLower].Parse(line.Substring(blockIndex + 1, line.Length - blockIndex - 1).Trim(), this);
+                        var length = prefixs[0].Key.Length;
+                        prefixs[0].Value.Parse(line.Substring(length, line.Length - length).Trim(), this);
                     }
-                    else
-                    {
-                        var prefixs = prefixParsers.Where(i => line.StartsWith(i.Key.ToLower())).ToArray();
-                        if (prefixs.Length > 0)    // 交给前缀解析器
-                        {
-                            if (prefixs.Length > 1)
-                                Warn($"有多个语句解析器与这一行匹配。选取 {prefixs[0].Value.GetType()} 进行解析");
-
-                            var length = prefixs[0].Key.Length;
-                            prefixs[0].Value.Parse(line.Substring(length, line.Length - length).Trim(), this);
-                        }
-                        else sayParser.Parse(line, this);    // 交给对话解析器
-                    }
-
+                    else sayParser.Parse(line, this);    // 交给对话解析器
                 }
 
-                results.ForEach(i =>
-                {
-                    if (i is OpenSentence os && os.IsOpen)
-                        Warn($"{i} 需要闭合，但并没有。这可能会带来意料意外的后果！\n请注意添加闭合符号 [/]");
-                });
+            }
 
-                story = new Story(results.Select(i => i).ToList(), characterDefs, jumps);
-                return true;
-            }
-            catch (Exception)
+            results.ForEach(i =>
             {
-                story = null;
-                return false;
-            }
+                if (i is OpenSentence os && os.IsOpen)
+                    Warn($"{i} 需要闭合，但并没有。这可能会带来意料意外的后果！\n请注意添加闭合符号 [/]");
+            });
+
+            story = new Story(results.Select(i => i).ToList(), characterDefs, jumps);
+            return true;
         }
 
         private int GetIndent()
