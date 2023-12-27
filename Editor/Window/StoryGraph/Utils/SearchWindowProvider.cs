@@ -21,15 +21,8 @@ namespace Hamstory
             AssetDatabase.GetAllAssetPaths()
                 .Where(i => i.StartsWith("Assets") && (i.EndsWith(".txt") || i.EndsWith(".hamstory")))
                 .ToList().ForEach(i =>
-                {
-                    // int j = 2, k = i.Length;
-                    // while (j > 0 && k > 0)
-                    // {
-                    //     k--;
-                    //     if (i[k] == '/') j--;
-                    // }
-                    list.Add(new SearchTreeEntry(new(i.Substring(7, i.Length - 7))) { level = 2, userData = i });
-                });
+                    list.Add(new SearchTreeEntry(new(i.Substring(7, i.Length - 7))) { level = 2, userData = i })
+                );
 
             list.Add(new SearchTreeGroupEntry(new("故事节点图"), 1));
 
