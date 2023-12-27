@@ -65,8 +65,7 @@ namespace Hamstory
         private bool Parse(out Story story)
         {
             var commandParsers = parsers.Where(i => i is CommandParser).Cast<CommandParser>()
-                .ToDictionary(i => i.Header, i => i);
-            var prefixParsers = parsers.Where(i => i is PrefixParser).ToList();
+                .ToDictionary(i => i.Header.ToLower(), i => i);
 
             for (lineIndex = 0; lineIndex < contents.Length; lineIndex++)
             {
@@ -82,7 +81,7 @@ namespace Hamstory
                     int rb = line.IndexOf(']');
                     if (rb == -1) Error("指令方括号没有闭合");
 
-                    var cmd = line.Substring(1, rb - 1);
+                    var cmd = line.Substring(1, rb - 1).ToLower();
                     if (commandParsers.TryGetValue(cmd, out var p))
                     {
                         parser = p;
