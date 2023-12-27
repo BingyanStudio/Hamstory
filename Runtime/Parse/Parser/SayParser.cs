@@ -2,9 +2,11 @@ using UnityEngine;
 
 namespace Hamstory
 {
-    public class SayParser
+    public class SayParser : SentenceParser
     {
-        public virtual void Parse(string content, StoryParser parser)
+        public override bool CanParse(string line) => false;
+
+        public override void Parse(string content, StoryParser parser)
         {
             if (!content.Contains(':'))
             {
