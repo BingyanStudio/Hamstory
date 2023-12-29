@@ -26,7 +26,7 @@ namespace Hamstory
 
         public override void Execute(StoryExecutorBase executor)
         {
-            if (characterKey.Length > 0) executor.SetCharacter(characterKey);
+            if (characterKey.Length > 0) executor.SetCharacter(characterKey, extra);
             else executor.ClearCharacter();
             executor.SetText(content);
         }
@@ -67,7 +67,7 @@ namespace Hamstory
 
     public struct MenuOption
     {
-        public readonly string Content;
+        public string Content { get; set; }
         public readonly int SentenceIndex;
 
         public MenuOption(string content, int sentenceIndex)

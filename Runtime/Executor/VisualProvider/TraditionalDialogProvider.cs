@@ -12,11 +12,15 @@ namespace Hamstory
     /// </summary>
     public class TraditionalDialogProvider : VisualProvider
     {
+        [Header("引用")]
         [SerializeField, Title("界面父物体")] private GameObject dialogPanel;
         [SerializeField, Title("菜单按钮容器")] private Transform menuParent;
         [SerializeField, Title("菜单按钮")] private GameObject menuBtn;
         [SerializeField, Title("角色名称文字")] private Text charNameText;
         [SerializeField, Title("内容文字")] private Text contentText;
+
+        [Header("参数")]
+        [SerializeField, Title("文字出现间隔")] private float charInterval = 0.1f;
 
         public override GameObject GetDialogPanel() => dialogPanel;
 
@@ -30,13 +34,13 @@ namespace Hamstory
             var text = contentText;
 
             int charIdx = 0;
-            float delta = 0.1f, lastTime = Time.timeSinceLevelLoad;
+            float lastTime = Time.timeSinceLevelLoad;
 
             while (charIdx < content.Length)
             {
-                if (Time.timeSinceLevelLoad - lastTime <= delta)
+                if (Time.timeSinceLevelLoad - lastTime <= charInterval)
                 {
-                    lastTime += delta;
+                    lastTime += charInterval;
                     charIdx++;
                 }
 

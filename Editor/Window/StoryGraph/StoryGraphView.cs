@@ -304,5 +304,11 @@ namespace Hamstory.Editor
             ClearSelection();
             selections.ForEach(i => AddToSelection(i));
         }
+
+        internal void NotifyStoryNodeReparse()
+        {
+            nodes.Where(i => i is StoryNode).Cast<StoryNode>()
+                .ToList().ForEach(i => i.ParseStory());
+        }
     }
 }

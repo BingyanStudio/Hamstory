@@ -1,6 +1,6 @@
 namespace Hamstory
 {
-    public class CloseParser : CommandParser
+    public class CloseParser : NoContentCommandParser
     {
         public override string Header => "/";
 
@@ -13,7 +13,7 @@ namespace Hamstory
         }
     }
 
-    public class CharacterDefParser : SentenceParser
+    public class CharacterDefParser : CommandParser
     {
         public override string Header => "Char";
 
@@ -25,7 +25,7 @@ namespace Hamstory
         }
     }
 
-    public class MenuParser : CommandParser
+    public class MenuParser : NoContentCommandParser
     {
         public override string Header => "Menu";
 
@@ -35,13 +35,14 @@ namespace Hamstory
         }
     }
 
-    public class MenuItemParser : SentenceParser
+    public class MenuItemParser : PrefixParser
     {
-        public override bool IsCommand => false;
         public override string Header => "-";
 
         public override void Parse(string content, StoryParser parser)
         {
+            content = content.Substring(Header.Length, content.Length - Header.Length).Trim();
+
             if (content.Length == 0)
             {
                 parser.Error("菜单选项似乎没有给定内容?\n正确示例: \"- 这是一个菜单\"");
@@ -58,7 +59,7 @@ namespace Hamstory
         }
     }
 
-    public class IfParser : SentenceParser
+    public class IfParser : CommandParser
     {
         public override string Header => "If";
 
@@ -69,7 +70,7 @@ namespace Hamstory
         }
     }
 
-    public class ElseIfParser : SentenceParser
+    public class ElseIfParser : CommandParser
     {
         public override string Header => "Elif";
 
@@ -92,7 +93,7 @@ namespace Hamstory
         }
     }
 
-    public class ElseParser : CommandParser
+    public class ElseParser : NoContentCommandParser
     {
         public override string Header => "Else";
 
@@ -105,7 +106,7 @@ namespace Hamstory
         }
     }
 
-    public class JumpParser : SentenceParser
+    public class JumpParser : CommandParser
     {
         public override string Header => "Jump";
 

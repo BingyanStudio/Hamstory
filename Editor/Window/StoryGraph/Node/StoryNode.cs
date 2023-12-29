@@ -14,14 +14,12 @@ namespace Hamstory.Editor
         private List<VisualElement> mutableEls = new();
         private List<Port> mutablePorts = new();
         private VisualElement mutableContainer = new();
-
         private Port flowIn, flowOut;
 
-        private Button btnReparse;
-
         internal override Port FlowIn => flowIn;
-
         internal override Port FlowOut => flowOut;
+
+        private int storyHash = 0;
 
         internal StoryNode(StoryGraphView view, StoryNodeData data) : base(view, data)
         {
@@ -31,16 +29,13 @@ namespace Hamstory.Editor
 
         protected virtual void BuildLayout()
         {
-            btnReparse = new Button(() => ParseStory(storyField.value));
-            btnReparse.text = "重新解析";
-
             storyField = new ObjectField("脚本");
             storyField.objectType = typeof(TextAsset);
-            storyField.RegisterValueChangedCallback(i => ParseStory(i.newValue));
+            storyField.RegisterValueChangedCallback(i => ParseStory(i.newValue as TextAsset));
             inputContainer.Add(storyField);
 
             storyField.value = Data.StoryText;
-            ParseStory(storyField.value);
+            ParseStory();
 
             mutableContainer.style.paddingLeft = new StyleLength(4);
             mutableContainer.style.marginTop = new StyleLength(8);
@@ -49,25 +44,29 @@ namespace Hamstory.Editor
             Refresh();
         }
 
-        protected virtual void ParseStory(UnityEngine.Object newFile)
+        internal void ParseStory() => ParseStory(storyField.value as TextAsset);
+
+        protected virtual void ParseStory(TextAsset storyFile)
         {
+            if (storyFile == null && storyHash == 0) return;
+            if (storyFile.text.GetHashCode() == storyHash) return;
+
             RemoveMutableElements();
-            if (newFile == null)
+            if (!storyFile)
             {
                 RemoveIOPorts();
                 RemoveExtraOutPorts();
-                if (inputContainer.Contains(btnReparse)) inputContainer.Remove(btnReparse);
 
                 Data.StoryText = null;
                 Data.Characters.Clear();
 
+                storyHash = 0;
+
                 Refresh();
                 return;
             }
-            else if (!inputContainer.Contains(btnReparse))
-                inputContainer.Insert(1, btnReparse);
 
-            var storyFile = newFile as TextAsset;
+            storyHash = storyFile.text.GetHashCode();
             Data.StoryText = storyFile;
             if (!StoryParser.Parse(storyFile.name, storyFile.text, out var story))
             {

@@ -4,7 +4,7 @@ using UnityEditor;
 namespace Hamstory.Editor
 {
     [CustomEditor(typeof(StoryGraph))]
-    public class StoryGraphEditor : UnityEditor.Editor
+    internal class StoryGraphEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()
         {
