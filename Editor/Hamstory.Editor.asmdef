@@ -4,7 +4,9 @@
         "Hamstory",
         "Bingyan.Devkit"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
