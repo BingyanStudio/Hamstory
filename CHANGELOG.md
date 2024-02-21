@@ -73,3 +73,5 @@
 ### 新增
 * 增加了 `StoryExecutorBase.Finished` 事件，用于在故事执行完毕后执行回调
 * 为 `StoryExecutorBase.Execute` 及其子类的重载增加了参数 callback，用于在故事执行完毕后执行回调
+* 增加了 `SingleStoryExecutor.SetVisual(VisualProvider)` 用于动态设置 `VisualProvider`
+* 增加了 `SingleStoryExecutor.SetData(DataProvider)` 用于动态设置 `DataProvider`
