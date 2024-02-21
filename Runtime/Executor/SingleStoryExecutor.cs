@@ -41,5 +41,21 @@ namespace Hamstory
         {
             visual.SetCharacter(characters[story.Characters.IndexOf(key)], extra);
         }
+
+        /// <summary>
+        /// 设置当前执行器的 <see cref="VisualProvider"/>
+        /// </summary>
+        public void SetVisual(VisualProvider visual)
+        {
+            this.visual = visual;
+        }
+
+        /// <summary>
+        /// 设置当前执行器的 <see cref="DataProvider"/>
+        /// </summary>
+        public void SetData(DataProvider data)
+        {
+            this.data = data;
+        }
     }
 }
