@@ -1,3 +1,4 @@
+using System;
 using Bingyan;
 using UnityEngine;
 
@@ -24,11 +25,11 @@ namespace Hamstory
                 Execute();
         }
 
-        public void Execute()
+        public void Execute(Action callback = null)
         {
             if (chain == null) chain = new(graph);
             else chain.Reset();
-            Execute(chain.CurStory);
+            Execute(chain.CurStory, callback);
         }
 
         public override void JumpTo(string target)

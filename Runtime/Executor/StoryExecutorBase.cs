@@ -90,6 +90,7 @@ namespace Hamstory
             End();
             GetDialogPanel().SetActive(false);
             Finished?.Invoke();
+            cbkExecuteEnded?.Invoke();
         }
 
         // 流程控制
