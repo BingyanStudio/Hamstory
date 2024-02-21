@@ -2,11 +2,14 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 namespace Hamstory
 {
     public abstract class StoryExecutorBase : MonoBehaviour
     {
+        public event Action Finished;
+
         // 执行器
         protected Story story;
         protected int index = 0;
@@ -15,22 +18,36 @@ namespace Hamstory
         protected Coroutine coroutine;
         protected bool running = false;
 
-        public virtual void Execute(TextAsset storyText)
+        // 回调
+        private Action cbkExecuteEnded;
+
+        /// <summary>
+        /// 执行一个故事，并在执行完毕后调用回调
+        /// </summary>
+        /// <param name="storyText">故事文本</param>
+        /// <param name="callback">回调</param>
+        public virtual void Execute(TextAsset storyText, Action callback = null)
         {
             StoryParser.Parse(storyText.name, storyText.text, out var story);
-            Execute(story);
+            Execute(story, callback);
         }
 
-        public virtual void Execute(Story story)
+        /// <summary>
+        /// 执行一个故事，并在执行完毕后调用回调
+        /// </summary>
+        /// <param name="story">故事</param>
+        /// <param name="callback">回调</param>
+        public virtual void Execute(Story story, Action callback = null)
         {
             this.story = story;
+            cbkExecuteEnded = callback;
 
             if (coroutine != null) StopAllCoroutines();
 
             index = 0;
             running = true;
             state?.Clear();
-            state = state ?? new();
+            state ??= new();
             coroutine = StartCoroutine(_Execute());
         }
 
@@ -72,6 +89,7 @@ namespace Hamstory
         {
             End();
             GetDialogPanel().SetActive(false);
+            Finished?.Invoke();
         }
 
         // 流程控制

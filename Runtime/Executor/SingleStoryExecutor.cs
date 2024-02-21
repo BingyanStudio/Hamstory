@@ -1,3 +1,4 @@
+using System;
 using Bingyan;
 using UnityEngine;
 
@@ -19,6 +20,11 @@ namespace Hamstory
         private void Awake()
         {
             if (executeOnAwake) Execute(storyText);
+        }
+
+        public void Execute(Action callback = null)
+        {
+            Execute(storyText, callback);
         }
 
         public override void JumpTo(string target)

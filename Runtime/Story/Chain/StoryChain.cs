@@ -78,12 +78,24 @@ namespace Hamstory
             index = 0;
         }
 
+        /// <summary>
+        /// 让 <see cref="StoryChain" /> 进入下一个节点
+        /// </summary>
+        /// <returns>该故事链是否结束？如果存在下一个节点，则返回否，反之返回是</returns>
         public bool Next() => curNode.Next(this, DEFAULT_BRANCH);
 
-
+        /// <summary>
+        /// 让 <see cref="StoryChain" /> 进入下一个节点
+        /// </summary>
+        /// <param name="key">下一节点所在的分支</param>
+        /// <returns>该故事链是否结束？如果存在下一个节点，则返回否，反之返回是</returns>
         public bool Next(string key) => Ended || curNode.Next(this, key);
 
-
+        /// <summary>
+        /// 依据当前的键，读取角色配置
+        /// </summary>
+        /// <param name="key">角色的键</param>
+        /// <returns>角色配置</returns>
         public CharacterConfig GetCurrentCharacter(string key)
         {
             var storyNode = curNode as StoryChainNode;
