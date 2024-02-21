@@ -88,7 +88,6 @@ namespace Hamstory
         public virtual void OnFinish()
         {
             End();
-            GetDialogPanel().SetActive(false);
             Finished?.Invoke();
             cbkExecuteEnded?.Invoke();
         }
