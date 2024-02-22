@@ -75,3 +75,9 @@
 * 为 `StoryExecutorBase.Execute` 及其子类的重载增加了参数 callback，用于在故事执行完毕后执行回调
 * 增加了 `SingleStoryExecutor.SetVisual(VisualProvider)` 用于动态设置 `VisualProvider`
 * 增加了 `SingleStoryExecutor.SetData(DataProvider)` 用于动态设置 `DataProvider`
+
+  
+## [0.0.1-beta7] - 2024-2-22
+### 新增
+* 增加了 `StoryExecutorBase.CharacterChanged` 事件，用于提示角色的切换，从而实现镜头切换等效果
+* 增加了 `StoryExecutorBase.GetCharacter(string)` 用于统一获取角色配置
