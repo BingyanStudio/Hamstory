@@ -44,9 +44,12 @@ namespace Hamstory
             else base.OnFinish();
         }
 
+        public override CharacterConfig GetCharacter(string key)
+            => chain.GetCurrentCharacter(key);
+
         public override void SetCharacter(string key, string extra = "")
         {
-            visual.SetCharacter(chain.GetCurrentCharacter(key), extra);
+            visual.SetCharacter(GetCharacter(key), extra);
         }
 
         public override void OnFinish()

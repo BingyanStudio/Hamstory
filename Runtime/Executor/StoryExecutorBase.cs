@@ -8,7 +8,16 @@ namespace Hamstory
 {
     public abstract class StoryExecutorBase : MonoBehaviour
     {
+        /// <summary>
+        /// 剧情结束时触发的回调
+        /// </summary>
         public event Action Finished;
+
+        /// <summary>
+        /// 角色发生变化时触发的回调<br/>
+        /// 如果切换为旁白，或角色被清空，则传递 <see cref="null"/>
+        /// </summary>
+        public event Action<CharacterConfig> CharacterChanged;
 
         // 执行器
         protected Story story;
@@ -17,6 +26,9 @@ namespace Hamstory
 
         protected Coroutine coroutine;
         protected bool running = false;
+
+        // 缓存
+        private string currentCharKey = "";
 
         // 回调
         private Action cbkExecuteEnded;
@@ -48,6 +60,7 @@ namespace Hamstory
             running = true;
             state?.Clear();
             state ??= new();
+            currentCharKey = "";
             coroutine = StartCoroutine(_Execute());
         }
 
@@ -67,8 +80,21 @@ namespace Hamstory
         // 基础功能
         public abstract VisualProvider Visual { get; }
         public virtual GameObject GetDialogPanel() => Visual.GetDialogPanel();
-        public abstract void SetCharacter(string key, string extra = "");
-        public virtual void ClearCharacter() => Visual.ClearCharacter();
+        public abstract CharacterConfig GetCharacter(string key);
+        public virtual void SetCharacter(string key, string extra = "")
+        {
+            if (!currentCharKey.Equals(key))
+            {
+                CharacterChanged?.Invoke(key.Length == 0 ? null : GetCharacter(key));
+                currentCharKey = key;
+            }
+        }
+        public virtual void ClearCharacter()
+        {
+            CharacterChanged?.Invoke(null);
+            currentCharKey = "";
+            Visual.ClearCharacter();
+        }
         public virtual void SetText(string content) => Visual.SetText(this, Data ? Data.Serialize(this, content) : content);
         public virtual void CreateMenu(List<MenuOption> options) => Visual.CreateMenu(this, Data ? options.Select(i =>
         {

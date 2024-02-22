@@ -37,9 +37,13 @@ namespace Hamstory
             Warn("单剧情脚本执行器不支持跨脚本跳转！");
         }
 
+        public override CharacterConfig GetCharacter(string key)
+            => characters[story.Characters.IndexOf(key)];
+
         public override void SetCharacter(string key, string extra = "")
         {
-            visual.SetCharacter(characters[story.Characters.IndexOf(key)], extra);
+            base.SetCharacter(key, extra);
+            visual.SetCharacter(GetCharacter(key), extra);
         }
 
         /// <summary>
