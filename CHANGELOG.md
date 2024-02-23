@@ -80,4 +80,15 @@
 ## [0.0.1-beta7] - 2024-2-22
 ### 新增
 * 增加了 `StoryExecutorBase.CharacterChanged` 事件，用于提示角色的切换，从而实现镜头切换等效果
-* 增加了 `StoryExecutorBase.GetCharacter(string)` 用于统一获取角色配置
+* 增加了 `StoryExecutorBase.GetCharacter(string)` 用于统一获取角色配置  
+
+  
+## [0.0.1-beta8] - 2024-2-23
+### 新增
+* [End] 语句块，用于在中途结束一段对话
+* [Return] 语句块，用于结束一段对话的同时，返回一些信息，以供代码逻辑实现不同选项的实际效果
+* 带有返回值的对话结束回调
+
+
+### 修复
+* 修复了 `StoryExecutorBase.End()` 与 `StoryExecutorBase.End()` 主次关系颠倒的问题
