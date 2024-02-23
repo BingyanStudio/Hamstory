@@ -9,9 +9,10 @@ namespace Hamstory
     public abstract class StoryExecutorBase : MonoBehaviour
     {
         /// <summary>
-        /// 剧情结束时触发的回调
+        /// 剧情结束时触发的回调<br/>
+        /// 传入返回值，若无返回值则为空字符串
         /// </summary>
-        public event Action Finished;
+        public event Action<string> Finished;
 
         /// <summary>
         /// 角色发生变化时触发的回调<br/>
@@ -31,14 +32,14 @@ namespace Hamstory
         private string currentCharKey = "";
 
         // 回调
-        private Action cbkExecuteEnded;
+        private Action<string> cbkExecuteEnded;
 
         /// <summary>
         /// 执行一个故事，并在执行完毕后调用回调
         /// </summary>
         /// <param name="storyText">故事文本</param>
         /// <param name="callback">回调</param>
-        public virtual void Execute(TextAsset storyText, Action callback = null)
+        public virtual void Execute(TextAsset storyText, Action<string> callback = null)
         {
             StoryParser.Parse(storyText.name, storyText.text, out var story);
             Execute(story, callback);
@@ -49,7 +50,7 @@ namespace Hamstory
         /// </summary>
         /// <param name="story">故事</param>
         /// <param name="callback">回调</param>
-        public virtual void Execute(Story story, Action callback = null)
+        public virtual void Execute(Story story, Action<string> callback = null)
         {
             this.story = story;
             cbkExecuteEnded = callback;
@@ -114,8 +115,6 @@ namespace Hamstory
         public virtual void OnFinish()
         {
             End();
-            Finished?.Invoke();
-            cbkExecuteEnded?.Invoke();
         }
 
         // 流程控制
@@ -134,19 +133,23 @@ namespace Hamstory
         public abstract void JumpTo(string target);
         public abstract void JumpToNext();
 
-        public virtual void End()
+        public virtual void End(string returnVal = "")
         {
             StopCoroutine(coroutine);
             running = false;
+
+            returnVal = returnVal.ToLower();
+            Finished?.Invoke(returnVal);
+            cbkExecuteEnded?.Invoke(returnVal);
         }
 
         // 日志
         public virtual void Warn(string msg)
         {
-            Debug.LogWarning(($"剧情执行警告: {msg}"));
+            Debug.LogWarning($"剧情执行警告: {msg}");
         }
 
         public virtual void Error(string msg)
-            => throw new System.Exception($"剧情执行出错: 在{story.GetSentence(index)}\n{msg}");
+            => throw new Exception($"剧情执行出错: 在{story.GetSentence(index)}\n{msg}");
     }
 }

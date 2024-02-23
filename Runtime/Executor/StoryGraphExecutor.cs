@@ -25,7 +25,7 @@ namespace Hamstory
                 Execute();
         }
 
-        public void Execute(Action callback = null)
+        public void Execute(Action<string> callback = null)
         {
             if (chain == null) chain = new(graph);
             else chain.Reset();

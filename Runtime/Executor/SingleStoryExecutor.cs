@@ -22,7 +22,7 @@ namespace Hamstory
             if (executeOnAwake) Execute(storyText);
         }
 
-        public void Execute(Action callback = null)
+        public void Execute(Action<string> callback = null)
         {
             Execute(storyText, callback);
         }
