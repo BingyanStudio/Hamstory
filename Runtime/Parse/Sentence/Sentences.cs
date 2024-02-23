@@ -155,4 +155,27 @@ namespace Hamstory
             else executor.JumpTo(tag);
         }
     }
+
+    public class StnEnd : Sentence
+    {
+        public override void Execute(StoryExecutorBase executor)
+        {
+            executor.End();
+        }
+    }
+
+    public class StnReturn : Sentence
+    {
+        private string returnVal;
+
+        public StnReturn(string returnVal)
+        {
+            this.returnVal = returnVal;
+        }
+
+        public override void Execute(StoryExecutorBase executor)
+        {
+            executor.End(returnVal);
+        }
+    }
 }

@@ -116,4 +116,24 @@ namespace Hamstory
             parser.AddSentence(new StnJump(content));
         }
     }
+
+    public class EndParser : NoContentCommandParser
+    {
+        public override string Header => "End";
+
+        protected override void CreateSentence(StoryParser parser)
+        {
+            parser.AddSentence(new StnEnd());
+        }
+    }
+
+    public class ReturnParser : CommandParser
+    {
+        public override string Header => "Return";
+
+        public override void Parse(string content, StoryParser parser)
+        {
+            parser.AddSentence(new StnReturn(content));
+        }
+    }
 }
