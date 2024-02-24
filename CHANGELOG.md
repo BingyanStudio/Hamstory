@@ -91,4 +91,9 @@
 
 
 ### 修复
-* 修复了 `StoryExecutorBase.End()` 与 `StoryExecutorBase.End()` 主次关系颠倒的问题
+* 修复了 `StoryExecutorBase.End()` 与 `StoryExecutorBase.End()` 主次关系颠倒的问题  
+
+  
+## [0.0.1-beta9] - 2024-2-24
+### 新增
+* 为各个组件添加了组件菜单
