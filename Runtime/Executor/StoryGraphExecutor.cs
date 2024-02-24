@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Hamstory
 {
+    [AddComponentMenu("Hamstory/StoryGraphExecutor")]
     public class StoryGraphExecutor : StoryExecutorBase
     {
         [SerializeField, Title("开始时执行")] private bool executeOnAwake = false;

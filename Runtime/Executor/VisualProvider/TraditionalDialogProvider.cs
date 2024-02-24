@@ -10,6 +10,7 @@ namespace Hamstory
     /// 传统的方框型对话框，没有提供“头像”。<br/>
     /// 如果需要头像（或更高级的功能，如头像的变化），可以继承这个类型并重写 SetCharacter 方法。
     /// </summary>
+    [AddComponentMenu("Hamstory/TraditionalDialogProvider")]
     public class TraditionalDialogProvider : VisualProvider
     {
         [Header("引用")]
