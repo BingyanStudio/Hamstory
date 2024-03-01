@@ -109,20 +109,20 @@ namespace Hamstory
         public override void OnExecuteInside(StoryExecutorBase executor)
         {
             var stn = executor.GetCurrentSentence();
-            if (stn is StnElseIf || stn is StnElse) executor.Goto(ExitPoint);
+            if (stn is StnElseIf or StnElse) executor.Goto(ExitPoint);
         }
 
         public bool AddElseIf(StnElseIf elseIf, int index)
         {
             if (hasElse) return false;
-            stnElseIfs.Add((elseIf, index));
+            stnElseIfs.Add((elseIf, index + 1));
             return true;
         }
 
         public bool SetElse(int index)
         {
             if (hasElse) return false;
-            elsePoint = index;
+            elsePoint = index + 1;
             hasElse = true;
             return true;
         }
@@ -134,7 +134,7 @@ namespace Hamstory
 
         public StnElseIf(string expression)
         {
-            this.Expression = expression;
+            Expression = expression;
         }
     }
 
