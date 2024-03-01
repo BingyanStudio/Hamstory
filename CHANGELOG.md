@@ -102,3 +102,4 @@
 ## [0.0.1-beta10] - 2024-3-1
 ### 新增
 * `BasicDataProvider`: 提供了基础的比较与变量解析接口的 `DataProvider`
+* 添加对布尔值的支持

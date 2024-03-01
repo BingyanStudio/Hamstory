@@ -8,6 +8,9 @@ namespace Hamstory
         public override bool Predicate(StoryExecutorBase executor, string expression)
         {
             var result = false;
+
+            if (Get(expression) is bool predication) return predication;
+
             if (TryPredicate(expression, "==", (l, r) => l.Equals(r), out result)) return result;
             if (TryPredicate(expression, "!=", (l, r) => !l.Equals(r), out result)) return result;
 
@@ -89,6 +92,11 @@ namespace Hamstory
 
             // 变量
             if (key.StartsWith("{") && key.EndsWith("}")) return Get(key.TrimStart('{').TrimEnd('}'));
+
+            // 布尔
+            var lowerKey = key.ToLower();
+            if (lowerKey == "true") return true;
+            if (lowerKey == "false") return false;
 
             // 整数
             if (int.TryParse(key, out var intVal)) return intVal;
