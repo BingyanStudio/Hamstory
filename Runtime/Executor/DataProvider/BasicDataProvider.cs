@@ -9,7 +9,7 @@ namespace Hamstory
         {
             var result = false;
 
-            if (Get(expression) is bool predication) return predication;
+            if (ParseVar(expression) is bool predication) return predication;
 
             if (TryPredicate(expression, "==", (l, r) => l.Equals(r), out result)) return result;
             if (TryPredicate(expression, "!=", (l, r) => !l.Equals(r), out result)) return result;
