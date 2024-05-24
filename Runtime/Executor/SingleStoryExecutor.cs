@@ -8,18 +8,16 @@ namespace Hamstory
     public class SingleStoryExecutor : StoryExecutorBase
     {
         [SerializeField, Title("开始时执行")] private bool executeOnAwake = false;
-        [SerializeField, Title("故事脚本")] private TextAsset storyText;
-
-        [SerializeField, HideInInspector] private CharacterConfig[] characters;
+        [SerializeField, Title("故事脚本")] private SingleStory storyConfig;
 
         private void Awake()
         {
-            if (executeOnAwake) Execute(storyText);
+            if (executeOnAwake) Execute(storyConfig.Story);
         }
 
         public override void Execute(Action<string> callback = null)
         {
-            Execute(storyText, callback);
+            Execute(storyConfig.Story, callback);
         }
 
         public override void JumpTo(string target)
@@ -33,6 +31,6 @@ namespace Hamstory
         }
 
         public override CharacterConfig GetCharacter(string key)
-            => characters[story.Characters.IndexOf(key)];
+            => storyConfig.Characters[story.Characters.IndexOf(key)];
     }
 }

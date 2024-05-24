@@ -1,11 +1,11 @@
-using UnityEditor;
 using UnityEngine;
+using UnityEditor;
 using static UnityEditor.EditorGUILayout;
 
 namespace Hamstory.Editor
 {
-    [CustomEditor(typeof(SingleStoryExecutor))]
-    internal class SingleStoryExecutorEditor : UnityEditor.Editor
+    [CustomEditor(typeof(SingleStory))]
+    public class SingleStoryEditor : UnityEditor.Editor
     {
         private int hash = 0;
         private Story story;
@@ -14,7 +14,7 @@ namespace Hamstory.Editor
         {
             base.OnInspectorGUI();
 
-            var textField = serializedObject.FindProperty("storyText");
+            var textField = serializedObject.FindProperty("story");
             var chars = serializedObject.FindProperty("characters");
             if (textField.objectReferenceValue && textField.objectReferenceValue is TextAsset t)
             {
@@ -23,6 +23,12 @@ namespace Hamstory.Editor
 
                 hash = t.text.GetHashCode();
                 chars.arraySize = story.Characters.Count;
+
+                if (chars.arraySize == 0)
+                {
+                    serializedObject.ApplyModifiedProperties();
+                    return;
+                }
 
                 Space(20);
                 LabelField("角色配置");
