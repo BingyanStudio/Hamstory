@@ -3,11 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using Bingyan;
 
 namespace Hamstory
 {
     public abstract class StoryExecutorBase : MonoBehaviour
     {
+        [SerializeField, Title("界面源")] private VisualProvider visual;
+        [SerializeField, Title("数据源")] private DataProvider data;
+
         /// <summary>
         /// 剧情结束时触发的回调<br/>
         /// 传入返回值，若无返回值则为空字符串
@@ -34,6 +38,11 @@ namespace Hamstory
         // 回调
         private Action<string> cbkExecuteEnded;
 
+        public virtual void Execute(Action<string> callback = null)
+        {
+            throw new NotImplementedException($"该方法尚未在 {GetType()} 中实现!");
+        }
+
         /// <summary>
         /// 执行一个故事，并在执行完毕后调用回调
         /// </summary>
@@ -53,7 +62,9 @@ namespace Hamstory
         public virtual void Execute(Story story, Action<string> callback = null)
         {
             this.story = story;
-            cbkExecuteEnded = callback;
+
+            if (callback is not null)
+                cbkExecuteEnded += callback;
 
             if (coroutine != null) StopAllCoroutines();
 
@@ -79,7 +90,7 @@ namespace Hamstory
         }
 
         // 基础功能
-        public abstract VisualProvider Visual { get; }
+        public virtual VisualProvider Visual => visual;
         public virtual GameObject GetDialogPanel() => Visual.GetDialogPanel();
         public abstract CharacterConfig GetCharacter(string key);
         public virtual void SetCharacter(string key, string extra = "")
@@ -88,6 +99,7 @@ namespace Hamstory
             {
                 CharacterChanged?.Invoke(key.Length == 0 ? null : GetCharacter(key));
                 currentCharKey = key;
+                visual.SetCharacter(GetCharacter(key), extra);
             }
         }
         public virtual void ClearCharacter()
@@ -105,7 +117,7 @@ namespace Hamstory
         public virtual void ClearMenu() => Visual.ClearMenu();
 
         // 处理变量
-        public abstract DataProvider Data { get; }
+        public virtual DataProvider Data => data;
         public virtual bool Predicate(string expression) => Data.Predicate(this, expression);
 
         // 状态控制
@@ -138,7 +150,7 @@ namespace Hamstory
             StopCoroutine(coroutine);
             running = false;
 
-            returnVal = returnVal.ToLower();
+            returnVal = returnVal.ToLower().Trim();
             Finished?.Invoke(returnVal);
             cbkExecuteEnded?.Invoke(returnVal);
         }
@@ -151,5 +163,21 @@ namespace Hamstory
 
         public virtual void Error(string msg)
             => throw new Exception($"剧情执行出错: 在{story.GetSentence(index)}\n{msg}");
+
+        /// <summary>
+        /// 设置当前执行器的 <see cref="VisualProvider"/>
+        /// </summary>
+        public void SetVisual(VisualProvider visual)
+        {
+            this.visual = visual;
+        }
+
+        /// <summary>
+        /// 设置当前执行器的 <see cref="DataProvider"/>
+        /// </summary>
+        public void SetData(DataProvider data)
+        {
+            this.data = data;
+        }
     }
 }

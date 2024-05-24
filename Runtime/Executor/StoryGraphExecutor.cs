@@ -9,14 +9,9 @@ namespace Hamstory
     {
         [SerializeField, Title("开始时执行")] private bool executeOnAwake = false;
 
-        [SerializeField, Title("界面源")] private VisualProvider visual;
-        [SerializeField, Title("数据源")] private DataProvider data;
         [SerializeField, Title("故事节点图")] private StoryGraph graph;
 
         private StoryChain chain;
-
-        public override VisualProvider Visual => visual;
-        public override DataProvider Data => data;
 
         private void Awake()
         {
@@ -26,7 +21,7 @@ namespace Hamstory
                 Execute();
         }
 
-        public void Execute(Action<string> callback = null)
+        public override void Execute(Action<string> callback = null)
         {
             if (chain == null) chain = new(graph);
             else chain.Reset();
@@ -47,11 +42,6 @@ namespace Hamstory
 
         public override CharacterConfig GetCharacter(string key)
             => chain.GetCurrentCharacter(key);
-
-        public override void SetCharacter(string key, string extra = "")
-        {
-            visual.SetCharacter(GetCharacter(key), extra);
-        }
 
         public override void OnFinish()
         {
