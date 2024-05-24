@@ -64,7 +64,7 @@ namespace Hamstory
             this.story = story;
 
             if (callback is not null)
-                cbkExecuteEnded += callback;
+                cbkExecuteEnded = callback;
 
             if (coroutine != null) StopAllCoroutines();
 
