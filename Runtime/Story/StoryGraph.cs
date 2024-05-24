@@ -88,9 +88,11 @@ namespace Hamstory
 
         public virtual NodeData Clone(string GUID)
         {
-            var clonedData = new NodeData();
-            clonedData.pos = pos;
-            clonedData.guid = GUID;
+            var clonedData = new NodeData
+            {
+                pos = pos,
+                guid = GUID
+            };
             return clonedData;
         }
     }
@@ -108,9 +110,11 @@ namespace Hamstory
 
         public override NodeData Clone(string GUID)
         {
-            var clonedData = new StoryNodeData(GUID, Pos);
-            clonedData.storyText = storyText;
-            clonedData.characters = new(characters);
+            var clonedData = new StoryNodeData(GUID, Pos)
+            {
+                storyText = storyText,
+                characters = new(characters)
+            };
             return clonedData;
         }
     }
@@ -126,8 +130,10 @@ namespace Hamstory
 
         public override NodeData Clone(string GUID)
         {
-            var clonedData = new SubGraphNodeData(GUID, Pos);
-            clonedData.subgraph = subgraph;
+            var clonedData = new SubGraphNodeData(GUID, Pos)
+            {
+                subgraph = subgraph
+            };
             return clonedData;
         }
     }
