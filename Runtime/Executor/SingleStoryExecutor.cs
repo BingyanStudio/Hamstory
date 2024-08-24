@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Bingyan;
 using UnityEngine;
 
@@ -10,14 +11,18 @@ namespace Hamstory
         [SerializeField, Title("开始时执行")] private bool executeOnAwake = false;
         [SerializeField, Title("故事脚本")] private SingleStory storyConfig;
 
+        private TextAsset storyText;
+        private CharacterConfig[] characters;
+
         private void Awake()
         {
-            if (executeOnAwake) Execute(storyConfig.Story);
+            SetStory(storyConfig);
+            if (executeOnAwake) Execute(storyText);
         }
 
         public override void Execute(Action<string> callback = null)
         {
-            Execute(storyConfig.Story, callback);
+            Execute(storyText, callback);
         }
 
         public override void JumpTo(string target)
@@ -31,6 +36,18 @@ namespace Hamstory
         }
 
         public override CharacterConfig GetCharacter(string key)
-            => storyConfig.Characters[story.Characters.IndexOf(key)];
+            => characters[story.Characters.IndexOf(key)];
+
+        public void SetStory(SingleStory story)
+        {
+            if (!story) return;
+            SetStory(story.Story, story.Characters);
+        }
+
+        public void SetStory(TextAsset storyText, CharacterConfig[] characters)
+        {
+            this.storyText = storyText;
+            this.characters = characters;
+        }
     }
 }
