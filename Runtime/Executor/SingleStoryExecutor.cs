@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Bingyan;
 using UnityEngine;
 
@@ -14,6 +13,8 @@ namespace Hamstory
         private TextAsset storyText;
         private CharacterConfig[] characters;
 
+        private Story s;
+
         private void Awake()
         {
             SetStory(storyConfig);
@@ -22,7 +23,7 @@ namespace Hamstory
 
         public override void Execute(Action<string> callback = null)
         {
-            Execute(storyText, callback);
+            Execute(s, callback);
         }
 
         public override void JumpTo(string target)
@@ -48,6 +49,8 @@ namespace Hamstory
         {
             this.storyText = storyText;
             this.characters = characters;
+
+            StoryParser.Parse(storyText, out s);
         }
     }
 }
