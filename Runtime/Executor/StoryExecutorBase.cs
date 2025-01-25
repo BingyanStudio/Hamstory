@@ -150,6 +150,8 @@ namespace Hamstory
             StopCoroutine(coroutine);
             running = false;
 
+            Visual.ClearDialog();
+
             returnVal = returnVal.ToLower().Trim();
             Finished?.Invoke(returnVal);
             cbkExecuteEnded?.Invoke(returnVal);

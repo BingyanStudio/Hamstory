@@ -79,5 +79,13 @@ namespace Hamstory
         {
             charNameText.text = "";
         }
+
+        public override void ClearDialog()
+        {
+            ClearMenu();
+            ClearCharacter();
+            contentText.text = "";
+        }
+
     }
 }

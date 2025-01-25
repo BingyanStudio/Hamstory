@@ -11,5 +11,6 @@ namespace Hamstory
         public abstract void SetText(StoryExecutorBase executor, string content);
         public abstract void CreateMenu(StoryExecutorBase executor, List<MenuOption> options);
         public abstract void ClearMenu();
+        public abstract void ClearDialog();
     }
 }
