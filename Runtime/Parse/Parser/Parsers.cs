@@ -86,8 +86,7 @@ namespace Hamstory
             if (parser.SearchBack<StnIf>(index, s => s.IsOpen, out var stnIf))
             {
                 var stn = new StnElseIf(content);
-                stnIf.AddElseIf(stn, index);
-                parser.AddSentence(stn);
+                stnIf.AddElseIf(stn, parser.AddSentence(stn));
             }
             else parser.Error("[Elif] 需要放在某个 [If] 或另一个 [Elif] 下方！");
         }

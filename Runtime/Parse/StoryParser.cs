@@ -8,12 +8,12 @@ namespace Hamstory
 {
     public class StoryParser
     {
-        private static List<SentenceParser> parsers;
+        private static readonly List<SentenceParser> parsers;
         private static SayParser sayParser = new();
 
         static StoryParser()
         {
-            var types = typeof(StoryParser).Assembly.GetTypes();
+            var types = AppDomain.CurrentDomain.GetAssemblies().SelectMany(i => i.GetTypes());
             parsers = types.Where(i => !i.IsAbstract && i.IsSubclassOf(typeof(SentenceParser)) && i != typeof(SayParser))
                         .Select(i => Activator.CreateInstance(i) as SentenceParser).ToList();
         }
@@ -40,15 +40,15 @@ namespace Hamstory
         public static bool Parse(TextAsset text, out Story result)
             => Parse(text.name, text.text, out result);
 
-        private string filePath;
+        private readonly string filePath;
 
-        private string[] contents;
+        private readonly string[] contents;
         private int lineIndex;
-        private string line => contents[lineIndex];
+        private string Line => contents[lineIndex];
 
-        private List<string> characterDefs = new();
-        private List<string> jumps = new();
-        private List<Sentence> results = new();
+        private readonly List<string> characterDefs = new();
+        private readonly List<string> jumps = new();
+        private readonly List<Sentence> results = new();
 
         /// <summary>
         /// 最后一个语句的序号
@@ -69,8 +69,8 @@ namespace Hamstory
 
             for (lineIndex = 0; lineIndex < contents.Length; lineIndex++)
             {
-                if (this.line.Trim().Length == 0) continue;
-                var line = this.line.Trim();
+                if (Line.Trim().Length == 0) continue;
+                var line = Line.Trim();
 
                 SentenceParser parser = null;
                 string content = line;
@@ -81,7 +81,7 @@ namespace Hamstory
                     int rb = line.IndexOf(']');
                     if (rb == -1) Error("指令方括号没有闭合");
 
-                    var cmd = line.Substring(1, rb - 1).ToLower();
+                    var cmd = line[1..rb].ToLower();
                     if (commandParsers.TryGetValue(cmd, out var p))
                     {
                         parser = p;
@@ -123,7 +123,7 @@ namespace Hamstory
         private int GetIndent()
         {
             int indent = 0;
-            while (line[indent] == ' ') indent++;
+            while (Line[indent] == ' ') indent++;
             if (indent % 4 != 0) Error("缩进数量不正确，空格应当为4的整数倍");
             indent /= 4;
             return indent;
