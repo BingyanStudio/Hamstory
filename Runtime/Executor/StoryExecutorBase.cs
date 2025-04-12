@@ -1,9 +1,9 @@
-using System.Linq;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using System;
+using System.Linq;
 using Bingyan;
+using UnityEngine;
 
 namespace Hamstory
 {
@@ -11,6 +11,11 @@ namespace Hamstory
     {
         [SerializeField, Title("界面源")] private VisualProvider visual;
         [SerializeField, Title("数据源")] private DataProvider data;
+
+        /// <summary>
+        /// 剧情开始执行时触发
+        /// </summary>
+        public event Action Started;
 
         /// <summary>
         /// 剧情结束时触发的回调<br/>
@@ -67,6 +72,8 @@ namespace Hamstory
                 cbkExecuteEnded = callback;
 
             if (coroutine != null) StopAllCoroutines();
+
+            Started?.Invoke();
 
             index = 0;
             running = true;
@@ -147,7 +154,8 @@ namespace Hamstory
 
         public virtual void End(string returnVal = "")
         {
-            StopCoroutine(coroutine);
+            if (coroutine != null)
+                StopCoroutine(coroutine);
             running = false;
 
             Visual.ClearDialog();
